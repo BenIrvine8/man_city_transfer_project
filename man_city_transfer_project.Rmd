@@ -3,14 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-Brief.
-Manchester City.
-We want to improve in the January transfer window. We don't want to add more than one player
-as Guardiola fears adding more could upset the balance of the team.
-We want a proven talent as we can't afford anything but a top two finish this season.
-Where should we invest our money?
-
-
 Area(s) city are weak? 
 - graph to show their xG is high
 - graph to show that their xG vs G isn't great for a team of their caliber
@@ -20,10 +12,8 @@ Conclusion = They need to invest in a striker.
 Best strikers in europe?
 who has the xG vs G (min 20 goals)
 
-Player price?
-
 Conclusion. They should go for one of these 5 options based on my research.
-- Lewa, Kramaric, Moreno, Benzema, Haaland
+- Lewa, Kramaric, Moreno, Benzema, Haaland        
 
 ```{r}
 library(tidyverse)
@@ -36,7 +26,13 @@ team_xg_data <- read_csv("data/understat_per_game.csv") %>%
   rename("conceded" = "missed")
 
 # Average number of goals scored a match in the Premier League
-g_data_2019 <- team_xg_data %>%
+  g_data_2019 <- team_xg_data %>%
+ filter(league == "EPL",
+        year == 2019) %>%
+  group_by(team) %>%
+  summarise(mean(scored))
+  # Mean xG 
+    xG_data_2019 <- team_xg_data %>%
  filter(league == "EPL",
         year == 2019) %>%
   group_by(team) %>%
@@ -70,7 +66,7 @@ they target a striker with a high conversion rate.
 
 ## Striker Player Data
 ```{r}
-player_data_pl <- read_csv("data/england/2020.21.EPL.Meta.csv") %>%
+player_data_pl <- read_csv("man_city_transfer_project/data/england/2020.21.EPL.Meta.csv") %>%
   arrange(desc(goals)) %>%
   head(10)
 

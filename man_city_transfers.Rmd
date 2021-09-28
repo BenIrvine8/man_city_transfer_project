@@ -1,10 +1,250 @@
 ---
 title: "Manchester City Transfer Options"
 author: "Ben Irvine"
-date: "21/09/2021"
+date: "22/09/2021"
 output: ioslides_presentation
+incremental: true
+template: quarterly-report.html
+widescreen: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 ```
+
+```{r}
+library(tidyverse)
+library(shiny)
+library(shinythemes)
+library(ggthemes)
+```
+
+## Brief
+- Manchester City want to improve in the January transfer window.
+
+- They don't want to add more than one player, as Pep Guardiola fears adding more could    upset the balance of his team.
+
+- They want a proven talent as they can't afford anything but a top two finish this season and are not confident in doing so with their current squad.
+
+- Where should they invest their money?
+
+## Who are Manchester City?
+- Football team founded in 1894
+
+- Highly successful club competing in the Premier League
+
+- Rapidly improved since being bought over by the Abu Dhabi United Group in 2008
+
+- Only team to ever reach the 100 point mark in the Premier League
+
+- Evaluated by Forbes at $2.69 billion
+
+- Finished 1st in the Premier League just last year
+
+
+## Approach to tackling the brief?
+- Planned how I was going to meet their request
+
+- Collected Appropriate data
+
+- Cleaned the Data
+
+- Looked at where Manchester City were statistically weakest
+
+- Looked for Players to Strengthen their Weakness(ses)
+
+## Preemptive Jargon Bust - What is xG?
+
+
+xG (Expected goals) is a predictive model used to assess every goal-scoring chance, and the likelihood a player will score. An xG model computes, for each chance, the probability to score based on what we know about the outcome of similar chances.
+
+- e.g a Penalty kick has an xG of 0.79
+
+- a shot from the halfway line would have a very low xG
+
+- It's very important that xG is interpreted correctly for it to have any kind of meaning
+
+
+# Manchester City Strength and Weakness identification
+
+
+---
+
+```{r echo=FALSE,out.height="600px",out.width="1000px"}
+team_xg_data <- read_csv("man_city_transfer_project/data/understat_per_game.csv") %>% 
+  rename("conceded" = "missed")
+
+xG_data_2019 <- team_xg_data %>%
+ filter(league == "EPL",
+        year == 2019) %>%
+  group_by(team) %>%
+  summarise(mean(xG))
+
+xG_data_2019 %>%
+  rename("Average_xG" = "mean(xG)") %>%
+  ggplot() +
+  aes(x = reorder(team, -Average_xG), y = Average_xG, fill = team) +
+  geom_col(colour = "#000000") +
+  theme_economist() +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90)) +
+  scale_fill_manual(values = c("#EF0107", "#95BFE5", "#DA291C", "#0057B8", "#6C1D45",
+                               "#034694", "#1B458F", "#003399", "#003090", "#C8102E",
+                               "#6CABDD", "#DA291C", "#241F20", "#FFF200", "#EE2737",
+                               "#D71920", "#132257", "#FBEE23", "#7A263A", "#FDB913")) +
+  labs(x = "\nTeam",
+             y = "Average Expected Goals\n",
+             colour = "",
+             title = "Premier League Average xG per match\n")
+```
+
+---
+
+```{r echo=FALSE,out.height="600px",out.width="1000px"}
+team_xg_data %>%
+ filter(league == "EPL",
+        year == 2019) %>%
+  group_by(team) %>%
+  summarise(mean(xG_diff)) %>%
+  rename("Average_xG_diff" = "mean(xG_diff)") %>%
+  ggplot() +
+  aes(x = reorder(team, -Average_xG_diff), y = Average_xG_diff, fill = team) +
+  geom_col(colour = "#000000") +
+  theme_economist() +
+  theme(legend.position = "none", axis.text.x = element_text(angle = 90)) +
+  scale_fill_manual(values = c("#EF0107", "#95BFE5", "#DA291C", "#0057B8", "#6C1D45",
+                               "#034694", "#1B458F", "#003399", "#003090", "#C8102E",
+                               "#6CABDD", "#DA291C", "#241F20", "#FFF200", "#EE2737",
+                               "#D71920", "#132257", "#FBEE23", "#7A263A", "#FDB913")) +
+  labs(x = "\nTeam",
+             y = "Avg Diff Between xG and Goals \n",
+             colour = "",
+             title = "Average Difference Between xG and Goals Scored per match\n")
+```
+
+---
+
+```{r echo=FALSE,out.height="600px",out.width="1000px"}
+team_xg_data %>%
+   filter(league == "EPL",
+          year == 2019) %>%
+  group_by(team) %>%
+  summarise(mean(conceded)) %>%
+   rename("Average_Goals_Conceded" = "mean(conceded)") %>%
+  ggplot() +
+  aes(x = reorder(team,  Average_Goals_Conceded), y = Average_Goals_Conceded, fill = team) +
+  geom_col(colour = "#000000") +
+  theme_economist() +
+ theme(legend.position = "none", axis.text.x = element_text(angle = 90)) +
+  scale_fill_manual(values = c("#EF0107", "#95BFE5", "#DA291C", "#0057B8", "#6C1D45",
+                               "#034694", "#1B458F", "#003399", "#003090", "#C8102E",
+                               "#6CABDD", "#DA291C", "#241F20", "#FFF200", "#EE2737",
+                               "#D71920", "#132257", "#FBEE23", "#7A263A", "#FDB913")) +
+  labs(x = "\nTeam",
+             y = "Average Goals conceded\n",
+             colour = "",
+             title = "Premier League Avg Goals Conceded per Match\n")
+
+```
+
+---
+
+```{r echo=FALSE,out.height="600px",out.width="1000px"}
+team_xg_data %>%
+   filter(league == "EPL",
+          year == 2019) %>%
+  group_by(team) %>%
+  summarise(mean(xGA)) %>%
+   rename("Average_Expected_Goals_Conceded" = "mean(xGA)") %>%
+   ggplot() +
+  aes(x = reorder(team, Average_Expected_Goals_Conceded), y = Average_Expected_Goals_Conceded, fill = team) +
+  geom_col(colour = "#000000") +
+  theme_economist() +
+theme(legend.position = "none", axis.text.x = element_text(angle = 90)) +
+  scale_fill_manual(values = c("#EF0107", "#95BFE5", "#DA291C", "#0057B8", "#6C1D45",
+                               "#034694", "#1B458F", "#003399", "#003090", "#C8102E",
+                               "#6CABDD", "#DA291C", "#241F20", "#FFF200", "#EE2737",
+                               "#D71920", "#132257", "#FBEE23", "#7A263A", "#FDB913")) +
+  labs(x = "\nTeam",
+             y = "Average Expected Goals Conceded\n",
+             colour = "",
+             title = "Premier League Average xGA\n")
+```
+
+
+## Conclusion
+
+- They create plenty chances to score
+
+- They rarely concede, and have one of the best defenses in the league
+
+- They don't have a great expected goal vs goal scored rate for a team of their calibre
+
+- This suggests they should invest in a clinical forward
+
+
+## How do you define whether a forward is 'clinical' or not?
+
+- They score goals (lots of goals)
+
+- They perform at a high level
+
+- They outperform their xG
+
+# Who are the best strikers in Europe? 
+
+---
+
+```{r echo=FALSE,out.height="600px",out.width="1000px"}
+player_data_pl <- read_csv("man_city_transfer_project/data/england/2020.21.EPL.Meta.csv") %>%
+  arrange(desc(goals)) %>%
+  head(10)
+
+player_data_ligue_1 <- read_csv("man_city_transfer_project/data/france/2020.21.Ligue1.Meta.csv") %>%
+  arrange(desc(goals)) %>%
+  head(10)
+
+player_data_bundesliga <- read_csv("man_city_transfer_project/data/germany/2020.21.Bundesliga.Meta.csv") %>%
+  arrange(desc(goals)) %>%
+  head(10)
+
+player_data_la_liga <- read_csv("man_city_transfer_project/data/spain/2020.21.La.Liga.Meta.csv") %>%
+  arrange(desc(goals)) %>%
+  head(10)
+
+player_data_serie_a <- read_csv("man_city_transfer_project/data/italy/2020.21.SerieA.Meta.csv") %>%
+  arrange(desc(goals)) %>%
+  head(10)
+
+
+full_join(player_data_bundesliga, player_data_la_liga) %>%
+  full_join(player_data_ligue_1) %>%
+  full_join(player_data_pl) %>%
+  full_join(player_data_serie_a) %>% 
+  mutate("xGvsG" = goals - xG)  %>%
+  filter(goals >= 20)%>%
+ arrange(desc(xGvsG)) %>%
+  ggplot() +
+  aes(x = reorder(player_name, -xGvsG), y = xGvsG, fill = player_name) +
+  geom_col(colour = "#000000") +
+  theme_economist() +
+ theme(legend.position = "none", axis.text.x = element_text(angle = 90)) +
+  scale_fill_manual(values = c("#e1000f", "#1C63B7", "#87D8F7", "#FFFFFF", "#482E92",                                    "#FDE100","#FFE667", "#132257", "#00529F", "#004170",                                    "#A50044", "1E71B8", "#CB3524", "#36384a", "#C8102E",                                    "#DC052D","#010E80", "#701D2F", "#c8102e", "#65B32E")) +
+  labs(x = "\nPlayer",
+           y = "Goals minus Expected Goals\n",
+            colour = "",
+           title = "Goals scored vs xG\n ",
+       subtitle = "Top 20 scorers in the Top 5 European Leagues\n
+       (Minimum twenty goals scored)\n")
+```
+
+## Lessons for the future 
+
+- Getting open source Football Data is very hard
+
+- Hex codes are infuriating
+
+- Everything will always takes longer than you think
+
+- Don't use a presentation tool you've never used before (especially if it's ioslides)
+
+# Questions?
